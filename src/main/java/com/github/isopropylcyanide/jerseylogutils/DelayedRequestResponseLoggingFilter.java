@@ -1,4 +1,19 @@
-package com.github.isopropylcyanide.logfilterutils;
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.github.isopropylcyanide.jerseylogutils;
+
+import com.github.isopropylcyanide.jerseylogutils.builder.RequestResponseBuilder;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -9,6 +24,8 @@ import javax.ws.rs.ext.WriterInterceptorContext;
 import java.io.IOException;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
+
+import static com.github.isopropylcyanide.jerseylogutils.builder.RequestResponseBuilder.DEFAULT_MAX_ENTITY_SIZE;
 
 /**
  * This class delays the logging of request and response events. A standard logging filter
@@ -46,6 +63,12 @@ public class DelayedRequestResponseLoggingFilter implements ContainerRequestFilt
         this.requestResponseBuilder = new RequestResponseBuilder(Math.max(0, maxEntitySize), DelayedRequestResponseLoggingFilter.class.getName());
         this.responseCondition = responseCondition;
         this.logger = Logger.getLogger(DelayedRequestResponseLoggingFilter.class.getName());
+    }
+
+    public DelayedRequestResponseLoggingFilter(Logger logger, ResponseCondition responseCondition) {
+        this.responseCondition = responseCondition;
+        this.requestResponseBuilder = new RequestResponseBuilder(DEFAULT_MAX_ENTITY_SIZE, DelayedRequestResponseLoggingFilter.class.getName());
+        this.logger = logger;
     }
 
     public DelayedRequestResponseLoggingFilter(Logger logger, ResponseCondition responseCondition, int maxEntitySize) {

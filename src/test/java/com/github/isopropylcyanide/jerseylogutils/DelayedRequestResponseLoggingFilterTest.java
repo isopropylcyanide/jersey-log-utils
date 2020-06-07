@@ -1,6 +1,6 @@
-package com.github.isopropylcyanide.logfilterutils;
+package com.github.isopropylcyanide.jerseylogutils;
 
-import com.github.isopropylcyanide.logfilterutils.DelayedRequestResponseLoggingFilter.ResponseCondition;
+import com.github.isopropylcyanide.jerseylogutils.DelayedRequestResponseLoggingFilter.ResponseCondition;
 import org.glassfish.jersey.internal.PropertiesDelegate;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.ContainerResponse;

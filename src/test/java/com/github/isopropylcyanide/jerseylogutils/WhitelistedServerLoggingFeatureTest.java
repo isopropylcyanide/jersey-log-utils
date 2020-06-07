@@ -1,4 +1,4 @@
-package com.github.isopropylcyanide.logfilterutils;
+package com.github.isopropylcyanide.jerseylogutils;
 
 import org.glassfish.jersey.internal.PropertiesDelegate;
 import org.glassfish.jersey.server.ContainerRequest;
