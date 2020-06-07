@@ -22,7 +22,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class RequestBuilder {
+public class RequestResponseBuilder {
 
     private static final String NOTIFICATION_PREFIX = "* ";
     private static final String REQUEST_PREFIX = "> ";
@@ -33,7 +33,7 @@ public class RequestBuilder {
     private final String loggerProperty;
 
 
-    public RequestBuilder(int maxEntitySize, String loggerClass) {
+    public RequestResponseBuilder(int maxEntitySize, String loggerClass) {
         this.maxEntitySize = maxEntitySize;
         this.loggerProperty = loggerClass + ".id";
         this.entityLoggerProperty = loggerClass + ".entityLogger";

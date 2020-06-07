@@ -37,27 +37,26 @@ import java.util.logging.Logger;
  */
 public class DelayedRequestResponseLoggingFilter implements ContainerRequestFilter, ContainerResponseFilter, WriterInterceptor {
 
-    private final RequestBuilder requestBuilder;
+    private final RequestResponseBuilder requestResponseBuilder;
     private final ResponseCondition responseCondition;
     private final ThreadLocal<StringBuilder> requestLogCache = new ThreadLocal<>();
-
-    private Logger logger;
+    private final Logger logger;
 
     public DelayedRequestResponseLoggingFilter(ResponseCondition responseCondition, int maxEntitySize) {
-        this.requestBuilder = new RequestBuilder(Math.max(0, maxEntitySize), DelayedRequestResponseLoggingFilter.class.getName());
+        this.requestResponseBuilder = new RequestResponseBuilder(Math.max(0, maxEntitySize), DelayedRequestResponseLoggingFilter.class.getName());
         this.responseCondition = responseCondition;
         this.logger = Logger.getLogger(DelayedRequestResponseLoggingFilter.class.getName());
     }
 
     public DelayedRequestResponseLoggingFilter(Logger logger, ResponseCondition responseCondition, int maxEntitySize) {
         this.responseCondition = responseCondition;
-        this.requestBuilder = new RequestBuilder(Math.max(0, maxEntitySize), DelayedRequestResponseLoggingFilter.class.getName());
+        this.requestResponseBuilder = new RequestResponseBuilder(Math.max(0, maxEntitySize), DelayedRequestResponseLoggingFilter.class.getName());
         this.logger = logger;
     }
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        StringBuilder requestLogBuilder = this.requestBuilder.buildRequestLog(requestContext);
+        StringBuilder requestLogBuilder = this.requestResponseBuilder.buildRequestLog(requestContext);
         requestLogCache.set(requestLogBuilder);
     }
 
@@ -67,9 +66,9 @@ public class DelayedRequestResponseLoggingFilter implements ContainerRequestFilt
             int status = responseContext.getStatus();
             if (responseCondition.test(status)) {
                 StringBuilder requestLogBuilder = requestLogCache.get();
-                if (requestBuilder != null) {
+                if (requestResponseBuilder != null) {
                     log(requestLogBuilder);
-                    StringBuilder responseBuilder = requestBuilder.buildResponseLog(requestContext, responseContext);
+                    StringBuilder responseBuilder = requestResponseBuilder.buildResponseLog(requestContext, responseContext);
                     log(responseBuilder);
                 }
             }
@@ -80,7 +79,7 @@ public class DelayedRequestResponseLoggingFilter implements ContainerRequestFilt
 
     @Override
     public void aroundWriteTo(WriterInterceptorContext context) throws IOException {
-        log(requestBuilder.getEntityWriterBuilder(context));
+        log(requestResponseBuilder.getEntityWriterBuilder(context));
     }
 
     boolean isRequestLogInCache() {
