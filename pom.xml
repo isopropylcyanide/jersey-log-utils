@@ -6,9 +6,10 @@
 
     <groupId>com.github.isopropylcyanide</groupId>
     <artifactId>jersey-log-utils</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <name>Log Filter Utils</name>
     <description>A set of helpful utilities for the conventional log filters</description>
+    <url>https://github.com/isopropylcyanide/jersey-log-utils</url>
 
     <developers>
         <developer>
