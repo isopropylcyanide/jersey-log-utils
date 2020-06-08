@@ -1,8 +1,9 @@
 
 ## Jersey Log Utils
-![Travis (.org)](https://img.shields.io/travis/isopropylcyanide/async-metrics-codahale)
-![Codecov](https://img.shields.io/codecov/c/github/isopropylcyanide/async-metrics-codahale)
-![GitHub](https://img.shields.io/github/license/isopropylcyanide/async-metrics-codahale?color=blue)
+![Maven Central](https://img.shields.io/maven-central/v/com.github.isopropylcyanide/jersey-log-utils)
+![Travis (.org)](https://img.shields.io/travis/isopropylcyanide/jersey-log-utils)
+![Codecov](https://img.shields.io/codecov/c/github/isopropylcyanide/jersey-log-utils)
+![GitHub](https://img.shields.io/github/license/isopropylcyanide/jersey-log-utils?color=blue)
 
 A set of useful utilities for the Jersey Server and Client log filters. These are 
 
@@ -50,7 +51,6 @@ However, it does so blindly, as it encounters each phase during the request life
 - We would not want to log all requests and responses, only the ones that match a particular criteria. Example of this would be requests that are from an ELB or health check system or static assets. Request entry need to be logged but not the payloads
 
 - For servers operating at high QPS, all successful requests and responses are logged which quickly leads to log rotation. The other alternative is to not register the filter at all which is not what we want. We only want to log where the responses are `4xx` or `409` or `400` and `500` or simply `200` requests. Such feature is not supported in the default filter as by the time response is received, the request is already logged.
- .
 
 
 ## Support
@@ -65,9 +65,3 @@ Copyright (c) 2012-2020 Aman Garg
 This library is licensed under the Apache License, Version 2.0.
 
 See http://www.apache.org/licenses/LICENSE-2.0.html or the LICENSE file in this repository for the full license text.
-
-
-
-
-
-
