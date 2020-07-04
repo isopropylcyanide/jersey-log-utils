@@ -92,7 +92,10 @@ public class DelayedRequestResponseLoggingFilter implements ContainerRequestFilt
                 if (requestResponseBuilder != null) {
                     log(requestLogBuilder);
                     StringBuilder responseBuilder = requestResponseBuilder.buildResponseLog(requestContext, responseContext);
-                    log(responseBuilder);
+                    if (!responseContext.hasEntity()) {
+                        //if entity is present, it will be called by the server run time through the interceptor
+                        log(responseBuilder);
+                    }
                 }
             }
         } finally {
