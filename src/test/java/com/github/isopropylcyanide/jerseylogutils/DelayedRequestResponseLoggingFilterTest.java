@@ -75,6 +75,27 @@ public class DelayedRequestResponseLoggingFilterTest {
     }
 
     @Test
+    public void testFilterContainerResponseLogsRequestButNotResponseWhenConditionIsMetAndResponseHasEntity() throws URISyntaxException, IOException {
+        loggingFilter = new DelayedRequestResponseLoggingFilter(logger, ResponseCondition.ON_RESPONSE_4XX_5XX, 100);
+        ContainerRequest request = stubContainerRequest();
+        request.setEntityStream(new ByteArrayInputStream("{Request entity}".getBytes()));
+
+        Response response4xx = Response.status(400).entity("Bad request").build();
+        ContainerResponse response = new ContainerResponse(stubContainerRequest(), response4xx);
+
+        loggingFilter.filter(request);
+        loggingFilter.filter(request, response);
+        assertFalse(loggingFilter.isRequestLogInCache());
+
+        ArgumentCaptor<String> argCaptor = ArgumentCaptor.forClass(String.class);
+        verify(logger, times(1)).info(argCaptor.capture());
+
+        String requestStream = argCaptor.getAllValues().get(0);
+        assertTrue(requestStream.contains("Server has received a request on thread main"));
+        assertTrue(requestStream.contains("{Request entity}"));
+    }
+
+    @Test
     public void testFilterContainerResponseDoesntLogRequestAndResponseWhenResponseConditionIsNotMetButCacheIsCleared() throws URISyntaxException, IOException {
         loggingFilter = new DelayedRequestResponseLoggingFilter(logger, ResponseCondition.ON_RESPONSE_5XX, 100);
         ContainerRequest request = stubContainerRequest();
