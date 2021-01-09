@@ -52,28 +52,28 @@ import static com.github.isopropylcyanide.jerseylogutils.builder.RequestResponse
  * Note that the {{@link #filter(ContainerRequestContext, ContainerResponseContext)}} block for response
  * is always run, and so the thread local is guaranteed to be garbage collected without leaks.
  */
-public class DelayedRequestResponseLoggingFilter implements ContainerRequestFilter, ContainerResponseFilter, WriterInterceptor {
+public class DelayedServerRequestResponseLoggingFilter implements ContainerRequestFilter, ContainerResponseFilter, WriterInterceptor {
 
     private final RequestResponseBuilder requestResponseBuilder;
     private final ResponseCondition responseCondition;
     private final ThreadLocal<StringBuilder> requestLogCache = new ThreadLocal<>();
     private final Logger logger;
 
-    public DelayedRequestResponseLoggingFilter(ResponseCondition responseCondition, int maxEntitySize) {
-        this.requestResponseBuilder = new RequestResponseBuilder(Math.max(0, maxEntitySize), DelayedRequestResponseLoggingFilter.class.getName());
+    public DelayedServerRequestResponseLoggingFilter(ResponseCondition responseCondition, int maxEntitySize) {
+        this.requestResponseBuilder = new RequestResponseBuilder(Math.max(0, maxEntitySize), DelayedServerRequestResponseLoggingFilter.class.getName());
         this.responseCondition = responseCondition;
-        this.logger = Logger.getLogger(DelayedRequestResponseLoggingFilter.class.getName());
+        this.logger = Logger.getLogger(DelayedServerRequestResponseLoggingFilter.class.getName());
     }
 
-    public DelayedRequestResponseLoggingFilter(Logger logger, ResponseCondition responseCondition) {
+    public DelayedServerRequestResponseLoggingFilter(Logger logger, ResponseCondition responseCondition) {
         this.responseCondition = responseCondition;
-        this.requestResponseBuilder = new RequestResponseBuilder(DEFAULT_MAX_ENTITY_SIZE, DelayedRequestResponseLoggingFilter.class.getName());
+        this.requestResponseBuilder = new RequestResponseBuilder(DEFAULT_MAX_ENTITY_SIZE, DelayedServerRequestResponseLoggingFilter.class.getName());
         this.logger = logger;
     }
 
-    public DelayedRequestResponseLoggingFilter(Logger logger, ResponseCondition responseCondition, int maxEntitySize) {
+    public DelayedServerRequestResponseLoggingFilter(Logger logger, ResponseCondition responseCondition, int maxEntitySize) {
         this.responseCondition = responseCondition;
-        this.requestResponseBuilder = new RequestResponseBuilder(Math.max(0, maxEntitySize), DelayedRequestResponseLoggingFilter.class.getName());
+        this.requestResponseBuilder = new RequestResponseBuilder(Math.max(0, maxEntitySize), DelayedServerRequestResponseLoggingFilter.class.getName());
         this.logger = logger;
     }
 

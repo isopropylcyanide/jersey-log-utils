@@ -15,6 +15,8 @@ package com.github.isopropylcyanide.jerseylogutils.builder;
 
 import org.glassfish.jersey.message.MessageUtils;
 
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.core.MultivaluedMap;
@@ -49,7 +51,8 @@ public class RequestResponseBuilder {
     private final int maxEntitySize;
     private final String entityLoggerProperty;
     private final String loggerProperty;
-    private final AtomicLong requestCounter = new AtomicLong(0);
+    private final AtomicLong serverRequestCounter = new AtomicLong(0);
+    private final AtomicLong clientRequestCounter = new AtomicLong(0);
 
     public RequestResponseBuilder(int maxEntitySize, String loggerClass) {
         this.maxEntitySize = maxEntitySize;
@@ -58,11 +61,11 @@ public class RequestResponseBuilder {
     }
 
     public StringBuilder buildRequestLog(ContainerRequestContext context) throws IOException {
-        long id = requestCounter.incrementAndGet();
+        long id = serverRequestCounter.incrementAndGet();
         context.setProperty(loggerProperty, id);
 
         StringBuilder requestBuilder = new StringBuilder();
-        buildRequestLogContent(requestBuilder, id, context.getMethod(), context.getUriInfo().getRequestUri());
+        buildServerRequestLogContent(requestBuilder, id, context.getMethod(), context.getUriInfo().getRequestUri());
         buildHeaders(requestBuilder, id, REQUEST_PREFIX, context.getHeaders());
 
         if (context.hasEntity()) {
@@ -72,18 +75,49 @@ public class RequestResponseBuilder {
         return requestBuilder;
     }
 
+    public StringBuilder buildRequestLog(ClientRequestContext context) {
+        long id = clientRequestCounter.incrementAndGet();
+        context.setProperty(loggerProperty, id);
+
+        StringBuilder requestBuilder = new StringBuilder();
+        buildClientRequestLogContent(requestBuilder, id, context.getMethod(), context.getUri());
+        buildHeaders(requestBuilder, id, REQUEST_PREFIX, context.getStringHeaders());
+
+        if (context.hasEntity()) {
+            OutputStream stream = new LoggingStream(requestBuilder, context.getEntityStream());
+            context.setEntityStream(stream);
+            context.setProperty(entityLoggerProperty, stream);
+        }
+        return requestBuilder;
+    }
+
     public StringBuilder buildResponseLog(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         Object requestId = requestContext.getProperty(loggerProperty);
-        long id = requestId != null ? (Long) requestId : this.requestCounter.incrementAndGet();
+        long id = requestId != null ? (Long) requestId : this.serverRequestCounter.incrementAndGet();
 
         StringBuilder responseBuilder = new StringBuilder();
-        buildResponseLogContent(responseBuilder, id, responseContext.getStatus());
+        buildServerResponseLogContent(responseBuilder, id, responseContext.getStatus());
         buildHeaders(responseBuilder, id, RESPONSE_PREFIX, responseContext.getStringHeaders());
 
         if (responseContext.hasEntity()) {
             OutputStream stream = new LoggingStream(responseBuilder, responseContext.getEntityStream());
             responseContext.setEntityStream(stream);
             requestContext.setProperty(entityLoggerProperty, stream);
+        }
+        return responseBuilder;
+    }
+
+    public StringBuilder buildResponseLog(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException {
+        Object requestId = requestContext.getProperty(loggerProperty);
+        long id = requestId != null ? (Long) requestId : this.clientRequestCounter.incrementAndGet();
+
+        StringBuilder responseBuilder = new StringBuilder();
+        buildClientResponseLogContent(responseBuilder, id, responseContext.getStatus());
+        buildHeaders(responseBuilder, id, RESPONSE_PREFIX, responseContext.getHeaders());
+
+        if (responseContext.hasEntity()) {
+            responseContext.setEntityStream(logInboundEntity(responseBuilder, responseContext.getEntityStream(),
+                    MessageUtils.getCharset(responseContext.getMediaType())));
         }
         return responseBuilder;
     }
@@ -97,7 +131,7 @@ public class RequestResponseBuilder {
         return null;
     }
 
-    private void buildRequestLogContent(StringBuilder b, long id, String method, URI uri) {
+    private void buildServerRequestLogContent(StringBuilder b, long id, String method, URI uri) {
         prefixId(b, id).append(NOTIFICATION_PREFIX)
                 .append("Server has received a request")
                 .append(" on thread ").append(Thread.currentThread().getName())
@@ -106,7 +140,16 @@ public class RequestResponseBuilder {
                 .append(uri.toASCIIString()).append("\n");
     }
 
-    private void buildResponseLogContent(StringBuilder b, long id, int status) {
+    private void buildClientRequestLogContent(StringBuilder b, long id, String method, URI uri) {
+        prefixId(b, id).append(NOTIFICATION_PREFIX)
+                .append("Sending client request")
+                .append(" on thread ").append(Thread.currentThread().getName())
+                .append("\n");
+        prefixId(b, id).append(REQUEST_PREFIX).append(method).append(" ")
+                .append(uri.toASCIIString()).append("\n");
+    }
+
+    private void buildServerResponseLogContent(StringBuilder b, long id, int status) {
         prefixId(b, id).append(NOTIFICATION_PREFIX)
                 .append("Server responded with a response")
                 .append(" on thread ").append(Thread.currentThread().getName()).append("\n");
@@ -115,6 +158,14 @@ public class RequestResponseBuilder {
                 .append("\n");
     }
 
+    private void buildClientResponseLogContent(StringBuilder b, long id, int status) {
+        prefixId(b, id).append(NOTIFICATION_PREFIX)
+                .append("Client response received")
+                .append(" on thread ").append(Thread.currentThread().getName()).append("\n");
+        prefixId(b, id).append(RESPONSE_PREFIX)
+                .append(status)
+                .append("\n");
+    }
 
     private StringBuilder prefixId(StringBuilder b, long id) {
         b.append(id).append(" ");

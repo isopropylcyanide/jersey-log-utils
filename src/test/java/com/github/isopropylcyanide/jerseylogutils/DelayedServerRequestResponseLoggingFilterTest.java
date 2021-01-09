@@ -1,6 +1,6 @@
 package com.github.isopropylcyanide.jerseylogutils;
 
-import com.github.isopropylcyanide.jerseylogutils.DelayedRequestResponseLoggingFilter.ResponseCondition;
+import com.github.isopropylcyanide.jerseylogutils.DelayedServerRequestResponseLoggingFilter.ResponseCondition;
 import org.glassfish.jersey.internal.PropertiesDelegate;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.ContainerResponse;
@@ -27,9 +27,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
-public class DelayedRequestResponseLoggingFilterTest {
+public class DelayedServerRequestResponseLoggingFilterTest {
 
-    private DelayedRequestResponseLoggingFilter loggingFilter;
+    private DelayedServerRequestResponseLoggingFilter loggingFilter;
 
     @Mock
     private Logger logger;
@@ -41,7 +41,7 @@ public class DelayedRequestResponseLoggingFilterTest {
 
     @Test
     public void testFilterContainerRequestContextAddsValueInThreadLocalCache() throws URISyntaxException, IOException {
-        loggingFilter = new DelayedRequestResponseLoggingFilter(ResponseCondition.ON_RESPONSE_2XX, 100);
+        loggingFilter = new DelayedServerRequestResponseLoggingFilter(ResponseCondition.ON_RESPONSE_2XX, 100);
         ContainerRequest request = stubContainerRequest();
         loggingFilter.filter(request);
 
@@ -51,7 +51,7 @@ public class DelayedRequestResponseLoggingFilterTest {
 
     @Test
     public void testFilterContainerResponseLogsRequestAndResponseWhenResponseConditionIsMet() throws URISyntaxException, IOException {
-        loggingFilter = new DelayedRequestResponseLoggingFilter(logger, ResponseCondition.ON_RESPONSE_4XX_5XX, 100);
+        loggingFilter = new DelayedServerRequestResponseLoggingFilter(logger, ResponseCondition.ON_RESPONSE_4XX_5XX, 100);
         ContainerRequest request = stubContainerRequest();
         request.setEntityStream(new ByteArrayInputStream("{Request entity}".getBytes()));
 
@@ -76,7 +76,7 @@ public class DelayedRequestResponseLoggingFilterTest {
 
     @Test
     public void testFilterContainerResponseLogsRequestButNotResponseWhenConditionIsMetAndResponseHasEntity() throws URISyntaxException, IOException {
-        loggingFilter = new DelayedRequestResponseLoggingFilter(logger, ResponseCondition.ON_RESPONSE_4XX_5XX, 100);
+        loggingFilter = new DelayedServerRequestResponseLoggingFilter(logger, ResponseCondition.ON_RESPONSE_4XX_5XX, 100);
         ContainerRequest request = stubContainerRequest();
         request.setEntityStream(new ByteArrayInputStream("{Request entity}".getBytes()));
 
@@ -97,7 +97,7 @@ public class DelayedRequestResponseLoggingFilterTest {
 
     @Test
     public void testFilterContainerResponseDoesntLogRequestAndResponseWhenResponseConditionIsNotMetButCacheIsCleared() throws URISyntaxException, IOException {
-        loggingFilter = new DelayedRequestResponseLoggingFilter(logger, ResponseCondition.ON_RESPONSE_5XX, 100);
+        loggingFilter = new DelayedServerRequestResponseLoggingFilter(logger, ResponseCondition.ON_RESPONSE_5XX, 100);
         ContainerRequest request = stubContainerRequest();
 
         Response response200 = Response.status(200).build();
@@ -111,7 +111,7 @@ public class DelayedRequestResponseLoggingFilterTest {
 
     @Test
     public void testFilterContainerResponseDoesntLogRequestAndResponseWhenResponseConditionIsNotMetForConflictButCacheIsCleared() throws URISyntaxException, IOException {
-        loggingFilter = new DelayedRequestResponseLoggingFilter(logger, ResponseCondition.ON_RESPONSE_4XX_5XX_NON_CONFLICT, 100);
+        loggingFilter = new DelayedServerRequestResponseLoggingFilter(logger, ResponseCondition.ON_RESPONSE_4XX_5XX_NON_CONFLICT, 100);
         ContainerRequest request = stubContainerRequest();
 
         Response response409 = Response.status(409).build();
@@ -125,7 +125,7 @@ public class DelayedRequestResponseLoggingFilterTest {
 
     @Test
     public void testFilterContainerResponseDoesntLogRequestAndResponseWhenResponseConditionIsNotFoundForConflictButCacheIsCleared() throws URISyntaxException, IOException {
-        loggingFilter = new DelayedRequestResponseLoggingFilter(logger, ResponseCondition.ON_RESPONSE_4XX_5XX_NON_NOT_FOUND, 100);
+        loggingFilter = new DelayedServerRequestResponseLoggingFilter(logger, ResponseCondition.ON_RESPONSE_4XX_5XX_NON_NOT_FOUND, 100);
         ContainerRequest request = stubContainerRequest();
 
         Response response409 = Response.status(404).build();
