@@ -24,8 +24,9 @@ This project is available on Maven Central. To add it to your project you can ad
 
 | Filter | Use Case |
 | ------------- | ------------- |
-| `WhitelistedServerLoggingFilter` |  Exclude requests and responses log for certain URI, say healthchecks  |
-| `DelayedRequestResponseLoggingFilter` |  Delay requests and response log for specific response codes |
+| `WhitelistedServerLoggingFilter` |  Exclude server requests and responses log for certain URI, say healthchecks  |
+| `WhitelistedClientLoggingFilter` |  Exclude client requests and responses log for certain URI, say heavy GET calls  |
+| `DelayedServerRequestResponseLoggingFilter` |  Delay server requests and response log for specific response codes |
 
 
 ## Usage
@@ -33,16 +34,31 @@ This project is available on Maven Central. To add it to your project you can ad
 - Register the filter to your Jersey Environment
 
 ```java
+     excludeContexts = Sets.newHashSet(
+                new ExcludeContext("v1/get"), //all Http Verbs
+                new ExcludeContext(HttpMethod.PUT, "v1/update") //PUT only
+        );
     environment.jersey().register(
-      new WhiteListedServerLoggingFeature(excludedPaths, maxEntitySize)
+      new WhiteListedServerLoggingFeature(excludeContexts, maxEntitySize)
     );
 ```
 
 ```java
     environment.jersey().register(
-      new DelayedRequestResponseLoggingFilter(logger, responseCondition: ResponseCondition.ON_RESPONSE_4XX_5XX)
+      new DelayedServerRequestResponseLoggingFilter(logger, responseCondition: ResponseCondition.ON_RESPONSE_4XX_5XX)
     );
 ```
+
+```java
+    excludeContexts = Sets.newHashSet(
+            new ExcludeContext(HttpMethod.GET, "v1/get"),
+            new ExcludeContext("v1/update") //all Verbs
+    );
+    new JerseyClientBuilder(environment).register(
+            new WhitelistedClientLoggingFilter(excludeContexts, logger, maxEntitySize)
+    );
+```
+
 ## Why
 The standard [`LoggingFilter`](http://javadox.com/org.glassfish.jersey.bundles/apidocs/2.11/org/glassfish/jersey/filter/LoggingFilter.html) which has been deprecated as of Jersey `2.26` is a universal logging filter and does a great job of logging requests and responses at the server. 
 
@@ -52,6 +68,7 @@ However, it does so blindly, as it encounters each phase during the request life
 
 - For servers operating at high QPS, all successful requests and responses are logged which quickly leads to log rotation. The other alternative is to not register the filter at all which is not what we want. We only want to log where the responses are `4xx` or `409` or `400` and `500` or simply `200` requests. Such feature is not supported in the default filter as by the time response is received, the request is already logged.
 
+- For client network calls, we might not want to log everything. Only what is required.
 
 ## Support
 
