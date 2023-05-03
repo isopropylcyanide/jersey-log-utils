@@ -5,7 +5,7 @@
 ![Codecov](https://img.shields.io/codecov/c/github/isopropylcyanide/jersey-log-utils)
 ![GitHub](https://img.shields.io/github/license/isopropylcyanide/jersey-log-utils?color=blue)
 
-A set of useful utilities for the Jersey Server and Client log filters. These are 
+A set of useful utilities for the Jersey Server and Client log filters. Have a look at the corresponding [blogpost](https://medium.com/nerd-for-tech/production-logging-feature-enhancements-atop-jersey-and-jax-rs-991127a36c88) to know more
 
 ## Maven Artifacts
 
